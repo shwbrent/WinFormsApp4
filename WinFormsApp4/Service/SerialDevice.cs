@@ -39,11 +39,4 @@ public class SerialDevice : IDevice
         await Task.Delay(1000);
         return "RS485 data";
     }
-
-    public event EventHandler<DataFetchedEventArgs> DataFetched;
-
-    protected virtual void OnDataFetched(string data)
-    {
-        DataFetched?.Invoke(this, new DataFetchedEventArgs(data, DateTime.Now));
-    }
 }

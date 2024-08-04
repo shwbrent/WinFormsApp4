@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Oven.Entity
 {
-    public class THM06
+    public class THM06Comm
     {
         public readonly Dictionary<THM06ParameterAddress, THM06DataType> commandsType;
-        public THM06()
+        public THM06Comm()
         {
             commandsType = new Dictionary<THM06ParameterAddress, THM06DataType>
             {

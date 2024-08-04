@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public interface IDevice
+public interface IDeviceService
 {
-    string DeviceName { get; }
-    void Connect();
-    void Disconnect();
-    Task<string> FetchDataAsync();
+    void AddDevice(IDevice device);
+    void RemoveDevice(IDevice device);
+    Task FetchDataAsync();
     event EventHandler<DataFetchedEventArgs> DataFetched;
 }

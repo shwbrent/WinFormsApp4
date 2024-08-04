@@ -4,8 +4,8 @@ using Oven.Utils.Modbus;
 using System.IO.Ports;
 using System.Net;
 using WindowsFormsApp5;
-using static Oven.Entity.DTME08;
-using static Oven.Entity.THM06;
+using static Oven.Entity.DTME08Comm;
+using static Oven.Entity.THM06Comm;
 
 namespace WinFormsApp4
 {

@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Oven.Entity
 {
-    public class DTME08
+    public class DTME08Comm
     {
         public readonly Dictionary<DTMParameterAddress, DTME08DataType> commandsType;
 
-        public DTME08()
+        public DTME08Comm()
         {
             commandsType = new Dictionary<DTMParameterAddress, DTME08DataType>{
                 { DTMParameterAddress.SV, DTME08DataType.UShort },
