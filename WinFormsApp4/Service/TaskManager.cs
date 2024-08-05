@@ -4,38 +4,38 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
+using Timer = System.Threading.Timer;
 
 public class TaskManager
 {
     private volatile List<Func<Task<IDeviceEntity>>> originalTaskFunctions = new List<Func<Task<IDeviceEntity>>>();
     private volatile List<Task<IDeviceEntity>> tasks = new List<Task<IDeviceEntity>>();
     private IDeviceService deviceService;
-    private System.Timers.Timer timer;
+    private Timer timer;
 
     public TaskManager(IDeviceService deviceService)
     {
         this.deviceService = deviceService;
-        timer = new System.Timers.Timer(500); // 每2秒檢查一次
-        timer.Elapsed += OnTimedEvent;
-        timer.AutoReset = true;
     }
 
     public void Start()
     {
-        timer.Start();
+        if (timer != null)
+        {
+            timer.Dispose();
+        }
+        timer = new Timer(TimerCallback, null, 0, 1000); // 每 1000 ms 執行一次
     }
+
     public void Stop()
     {
-        timer.Stop();
+        if(timer != null)
+        {
+            timer.Dispose();
+        }
     }
 
-    public void AddTask(Func<Task<IDeviceEntity>> taskFunction)
-    {
-        originalTaskFunctions.Add(taskFunction);
-    }
-
-    private async void OnTimedEvent(object source, ElapsedEventArgs e)
+    private async void TimerCallback(object? state)
     {
         // 等待當前所有任務完成再繼續添加新任務
         await Task.WhenAll(tasks);
@@ -68,5 +68,10 @@ public class TaskManager
         }
 
         deviceService.ProcessResults(results);
+    }
+
+    public void AddTask(Func<Task<IDeviceEntity>> taskFunction)
+    {
+        originalTaskFunctions.Add(taskFunction);
     }
 }
