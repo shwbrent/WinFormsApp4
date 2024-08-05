@@ -14,7 +14,8 @@ namespace WinFormsApp4
 
         }
 
-        private DevcieService deviceDataService;
+        private DeviceService deviceDataService;
+        private DataCollector dataCollector;
         private void Form1_Load(object sender, EventArgs e)
         {
             // modbus / Serial Init
@@ -31,11 +32,12 @@ namespace WinFormsApp4
 
             //var devices = new List<IDevice> { device1, device2, ethernetDevice };
             var devices = new List<IDevice> { device1, device2, device3 };
-            deviceDataService = new DevcieService();
+            deviceDataService = DeviceService.Instance;
             deviceDataService.AddDevice(device1);
             deviceDataService.AddDevice(device2);
             deviceDataService.AddDevice(device3);
 
+            dataCollector = new DataCollector(@"D:\" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".csv");
         }
 
         private void DeviceDataService_DataFetched(object? sender, DataFetchedEventArgs e)
@@ -85,13 +87,17 @@ namespace WinFormsApp4
 
             deviceDataService.DataFetched -= DeviceDataService_DataFetched;
             deviceDataService.DataFetched += DeviceDataService_DataFetched;
+            deviceDataService.StopCollectingData();
             deviceDataService.StartCollectingData();
+
+            dataCollector.StartCollector();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             deviceDataService.DataFetched -= DeviceDataService_DataFetched;
             deviceDataService.StopCollectingData();
+            dataCollector.StopCollector();
         }
     }
 }

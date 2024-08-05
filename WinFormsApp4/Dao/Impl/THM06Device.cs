@@ -15,8 +15,8 @@ public class THM06Device : IDevice
     private static THM06Comm tHM06 = new THM06Comm();
     private readonly SerialPort serialPort;
     private readonly ModbusRtuMaster modbusMaster;
-
     public string DeviceName { get; set; }
+    public Type DeviceType => typeof(THM06Entity);
 
     public THM06Device(string deviceName, SerialPort serialPort)
     {
@@ -88,7 +88,7 @@ public class THM06Device : IDevice
         }
         finally
         {
-            await Task.Delay(100);
+            Thread.Sleep(10);
         }
         return entity;
     }

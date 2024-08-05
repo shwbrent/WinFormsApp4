@@ -11,18 +11,27 @@ using System.Threading.Tasks;
 using static WinFormsApp4.Dao.Impl.DTME08Comm;
 using static WinFormsApp4.Dao.Impl.THM06Comm;
 
-public class DevcieService : IDeviceService
+public class DeviceService : IDeviceService
 {
     // 私有靜態字段保存單例實例
-    private static readonly Lazy<DevcieService> instance = new Lazy<DevcieService>(() => new DevcieService());
+    private static readonly Lazy<DeviceService> instance = new Lazy<DeviceService>(() => new DeviceService());
 
-    private volatile List<IDevice> devices = new List<IDevice>();
+    public volatile List<IDevice> devices = new List<IDevice>();
     private TaskManager taskManager;
     private volatile bool isCollectingData;
 
-    public DevcieService()
+    public DeviceService()
     {
         isCollectingData = false;
+    }
+
+    // 公共靜態屬性返回單例實例
+    public static DeviceService Instance
+    {
+        get
+        {
+            return instance.Value;
+        }
     }
 
     public void AddDevice(IDevice device)

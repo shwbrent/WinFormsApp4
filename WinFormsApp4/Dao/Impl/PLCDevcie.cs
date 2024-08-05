@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 public class PLCDevcie : IDevice
 {
     public string DeviceName { get; set; }
+    public Type DeviceType => typeof(PLCEntity);
     private A3E qNA3E;
 
     public PLCDevcie(string deviceName, string IpAddress, int port)
@@ -53,6 +54,7 @@ public class PLCDevcie : IDevice
         {
             Logger.Instance.writeMessage("", $"{Process.GetCurrentProcess().Threads.Count}", res.Message);
         }
+        Thread.Sleep(10);
         return entity;
     }
 }

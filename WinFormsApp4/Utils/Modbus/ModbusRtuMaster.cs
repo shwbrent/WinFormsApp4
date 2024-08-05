@@ -267,22 +267,16 @@ namespace Oven.Utils.Modbus
 
             int responseLength = GetExpectedResponseLength(frame);
             byte[] buffer = new byte[responseLength];
-            lock (_serialPort)
+            lock (_lock)
             {
                 try
                 {
                     // 確保不會同時進行發送和接收操作
-                    //Console.WriteLine("鎖定以發送資料...");
                     _serialPort.DiscardInBuffer();
                     _serialPort.Write(frame, 0, frame.Length);
-                    //Console.WriteLine("資料已發送");
-
-                    Task.Delay(20);
 
                     int bytesRead = 0;
 
-
-                    //Console.WriteLine("等待接收資料...");
                     while (bytesRead < responseLength)
                     {
                         int read = _serialPort.BaseStream.Read(buffer, bytesRead, responseLength - bytesRead);
@@ -291,7 +285,6 @@ namespace Oven.Utils.Modbus
                         //    Console.WriteLine("讀取超時");
                         //}
                         bytesRead += read;
-                        //Console.WriteLine($"已讀取 {bytesRead}/{responseLength} 字節");
                     }
                 }
                 catch (TimeoutException ex)
