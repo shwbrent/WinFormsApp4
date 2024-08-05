@@ -6,58 +6,67 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace WindowsFormsApp5
+public class TaskManager
 {
-    public class TaskManager<TResult>
+    private volatile List<Func<Task<IDeviceEntity>>> originalTaskFunctions = new List<Func<Task<IDeviceEntity>>>();
+    private volatile List<Task<IDeviceEntity>> tasks = new List<Task<IDeviceEntity>>();
+    private IDeviceService deviceService;
+    private System.Timers.Timer timer;
+
+    public TaskManager(IDeviceService deviceService)
     {
-        private volatile List<Func<Task>> originalTaskFunctions = new List<Func<Task>>();
-        private volatile List<Task> tasks = new List<Task>();
-        private System.Timers.Timer timer;
+        this.deviceService = deviceService;
+        timer = new System.Timers.Timer(500); // 每2秒檢查一次
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+    }
 
-        public TaskManager()
+    public void Start()
+    {
+        timer.Start();
+    }
+    public void Stop()
+    {
+        timer.Stop();
+    }
+
+    public void AddTask(Func<Task<IDeviceEntity>> taskFunction)
+    {
+        originalTaskFunctions.Add(taskFunction);
+    }
+
+    private async void OnTimedEvent(object source, ElapsedEventArgs e)
+    {
+        // 等待當前所有任務完成再繼續添加新任務
+        await Task.WhenAll(tasks);
+
+        // 檢查未完成的任務
+        if (tasks.Exists(t => !t.IsCompleted))
         {
-            timer = new System.Timers.Timer(500); // 每2秒檢查一次
-            timer.Elapsed += OnTimedEvent;
-            timer.AutoReset = true;
+            //UpdateStatus("Some tasks are still running. Waiting for completion.");
+            return;
         }
 
-        public void Start()
+        // 清除已完成的任務並處理結果
+        List<IDeviceEntity> results = new List<IDeviceEntity>();
+        foreach (var task in tasks.ToList())
         {
-            timer.Start();
-        }
-
-        public void AddTask(Func<Task> taskFunction)
-        {
-            originalTaskFunctions.Add(taskFunction);
-        }
-
-        private async void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            // 等待當前所有任務完成再繼續添加新任務
-            await Task.WhenAll(tasks.ToArray());
-
-            // 檢查未完成的任務
-            if (tasks.Exists(t => !t.IsCompleted))
+            if (task.IsCompletedSuccessfully)
             {
-                //UpdateStatus("Some tasks are still running. Waiting for completion.");
-                return;
+                results.Add(await task);
             }
-
-            // 清除已完成的任務
-            tasks.Clear();
-
-            // 重新添加所有原始任務
-            foreach (var taskFunction in tasks)
-            {
-                //Task newTask = taskFunction();
-                //tasks.Add(newTask);
-                taskFunction.Start();
-            }
-
-            //UpdateStatus("All tasks restarted.");
-            // 列印當前執行緒數量
-            int threadCount = Process.GetCurrentProcess().Threads.Count;
-            //UpdateStatus($"Current thread count: {threadCount}");
         }
+
+        // 清除已完成的任務
+        tasks.Clear();
+
+        // 重新添加所有原始任務
+        foreach (var taskFunction in originalTaskFunctions)
+        {
+            Task<IDeviceEntity> newTask = taskFunction();
+            tasks.Add(newTask);
+        }
+
+        deviceService.ProcessResults(results);
     }
 }

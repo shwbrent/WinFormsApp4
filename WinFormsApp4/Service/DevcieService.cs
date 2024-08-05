@@ -1,18 +1,28 @@
-﻿using System;
+﻿using Mitsubishi.Communication.MC.Mitsubishi.Base;
+using Oven.Utils;
+using Oven.Utils.Modbus;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static WinFormsApp4.Dao.Impl.DTME08Comm;
+using static WinFormsApp4.Dao.Impl.THM06Comm;
 
 public class DevcieService : IDeviceService
 {
-    private readonly List<IDevice> devices = new List<IDevice>();
-    private readonly SerialPort serialPort;
+    // 私有靜態字段保存單例實例
+    private static readonly Lazy<DevcieService> instance = new Lazy<DevcieService>(() => new DevcieService());
 
-    public DevcieService(string portName, int baudRate)
+    private volatile List<IDevice> devices = new List<IDevice>();
+    private TaskManager taskManager;
+    private volatile bool isCollectingData;
+
+    public DevcieService()
     {
-        serialPort = new SerialPort(portName, baudRate);
+        isCollectingData = false;
     }
 
     public void AddDevice(IDevice device)
@@ -25,33 +35,57 @@ public class DevcieService : IDeviceService
         devices.Remove(device);
     }
 
-    public async Task FetchDataAsync()
+    public void StartCollectingData()
     {
-        if (!serialPort.IsOpen)
+        if (!isCollectingData)
         {
-            serialPort.Open();
+            taskManager = new TaskManager(this);
+            foreach (var device in devices)
+            {
+                taskManager.AddTask(async() => await device.FetchDataAsync());
+            }
+            taskManager.Start();
         }
-
-        foreach (var device in devices)
-        {
-            // 切換到當前設備
-            SelectDevice(device);
-
-            var data = await device.FetchDataAsync();
-            Console.WriteLine($"{device.DeviceName} fetched data: {data} at {DateTime.Now}");
-        }
-
-        serialPort.Close();
     }
 
-    private void SelectDevice(IDevice device)
+    public void StopCollectingData()
     {
-        // 選擇設備的邏輯，例如發送特定命令來選擇設備
+        if (isCollectingData)
+        {
+            taskManager.Stop();
+            isCollectingData = false;
+        }
+    }
+
+    public void ProcessResults(List<IDeviceEntity> results)
+    {
+        List<IDeviceEntity> datas = new List<IDeviceEntity>();
+
+        foreach (var result in results)
+        {
+            if(result is THM06Entity)
+            {
+                THM06Entity entity = (THM06Entity)result;
+                datas.Add(entity);
+            }
+            else if(result is DTME08Entity)
+            {
+                DTME08Entity entity = (DTME08Entity)result;
+                datas.Add(entity);
+            }
+            else if(result is PLCEntity)
+            {
+                PLCEntity entity = (PLCEntity)result;
+                datas.Add(entity);
+            }
+        }
+        
+        OnDataFetched(datas);
     }
 
     public event EventHandler<DataFetchedEventArgs> DataFetched;
 
-    protected virtual void OnDataFetched(string data)
+    protected virtual void OnDataFetched(List<IDeviceEntity> data)
     {
         DataFetched?.Invoke(this, new DataFetchedEventArgs(data, DateTime.Now));
     }

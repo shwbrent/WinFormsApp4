@@ -28,42 +28,86 @@
         /// </summary>
         private void InitializeComponent()
         {
-            richTextBox1 = new RichTextBox();
-            richTextBox2 = new RichTextBox();
+            button1 = new Button();
+            button2 = new Button();
+            textBox1 = new TextBox();
+            textBox2 = new TextBox();
+            textBox3 = new TextBox();
+            textBox4 = new TextBox();
             SuspendLayout();
             // 
-            // richTextBox1
+            // button1
             // 
-            richTextBox1.Location = new Point(46, 41);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(571, 45);
-            richTextBox1.TabIndex = 0;
-            richTextBox1.Text = "";
+            button1.Location = new Point(679, 126);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 2;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
-            // richTextBox2
+            // button2
             // 
-            richTextBox2.Location = new Point(46, 127);
-            richTextBox2.Name = "richTextBox2";
-            richTextBox2.Size = new Size(571, 273);
-            richTextBox2.TabIndex = 1;
-            richTextBox2.Text = "";
+            button2.Location = new Point(679, 182);
+            button2.Name = "button2";
+            button2.Size = new Size(75, 23);
+            button2.TabIndex = 3;
+            button2.Text = "button2";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(113, 80);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(100, 23);
+            textBox1.TabIndex = 4;
+            // 
+            // textBox2
+            // 
+            textBox2.Location = new Point(113, 127);
+            textBox2.Name = "textBox2";
+            textBox2.Size = new Size(100, 23);
+            textBox2.TabIndex = 5;
+            // 
+            // textBox3
+            // 
+            textBox3.Location = new Point(113, 182);
+            textBox3.Name = "textBox3";
+            textBox3.Size = new Size(100, 23);
+            textBox3.TabIndex = 6;
+            // 
+            // textBox4
+            // 
+            textBox4.Location = new Point(113, 237);
+            textBox4.Name = "textBox4";
+            textBox4.Size = new Size(100, 23);
+            textBox4.TabIndex = 7;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(richTextBox2);
-            Controls.Add(richTextBox1);
+            Controls.Add(textBox4);
+            Controls.Add(textBox3);
+            Controls.Add(textBox2);
+            Controls.Add(textBox1);
+            Controls.Add(button2);
+            Controls.Add(button1);
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
-
-        private RichTextBox richTextBox1;
-        private RichTextBox richTextBox2;
+        private Button button1;
+        private Button button2;
+        private TextBox textBox1;
+        private TextBox textBox2;
+        private TextBox textBox3;
+        private TextBox textBox4;
     }
 }

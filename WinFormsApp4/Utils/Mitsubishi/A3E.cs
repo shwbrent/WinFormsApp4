@@ -30,7 +30,7 @@ namespace Mitsubishi.Communication.MC.Mitsubishi
         /// <param name="address">存儲區地址</param>
         /// <param name="count">讀取長度</param>
         /// <returns></returns>
-        public Result<T> Read<T>(string address, short count)
+        public async Task<Result<T>> Read<T>(string address, short count)
         {
             AreaCode areaCode; string start;
             (areaCode, start) = this.AnalysisAddress(address);

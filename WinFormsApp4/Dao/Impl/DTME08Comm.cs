@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Oven.Entity
+namespace WinFormsApp4.Dao.Impl
 {
     public class DTME08Comm
     {

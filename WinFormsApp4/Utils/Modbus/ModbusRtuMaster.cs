@@ -1,4 +1,5 @@
 ﻿using System.IO.Ports;
+using System.Runtime.CompilerServices;
 
 namespace Oven.Utils.Modbus
 {
@@ -62,7 +63,7 @@ namespace Oven.Utils.Modbus
         public async Task<byte[]> ReadHoldingRegistersAsync(byte slaveAddress, ushort startAddress, ushort numberOfPoints)
         {
             byte[] frame = BuildReadRequestFrame(slaveAddress, 0x03, startAddress, numberOfPoints);
-            byte[] response = await SendAndReceiveAsync(frame);
+            byte[] response = await SendAndReceiveAsync(frame).ConfigureAwait(false);
             return ParseReadResponse(response);
         }
 
@@ -197,7 +198,7 @@ namespace Oven.Utils.Modbus
                 _serialPort.DiscardInBuffer();
                 _serialPort.Write(frame, 0, frame.Length);
 
-                Thread.Sleep(100); // 等待設備回應
+                Thread.Sleep(50); // 等待設備回應
 
                 byte[] buffer = new byte[256];
                 int bytesRead = 0;
@@ -266,16 +267,17 @@ namespace Oven.Utils.Modbus
 
             int responseLength = GetExpectedResponseLength(frame);
             byte[] buffer = new byte[responseLength];
-            lock (_lock)
+            lock (_serialPort)
             {
                 try
                 {
                     // 確保不會同時進行發送和接收操作
                     //Console.WriteLine("鎖定以發送資料...");
-                    //_serialPort.DiscardInBuffer();
+                    _serialPort.DiscardInBuffer();
                     _serialPort.Write(frame, 0, frame.Length);
                     //Console.WriteLine("資料已發送");
 
+                    Task.Delay(20);
 
                     int bytesRead = 0;
 
@@ -328,14 +330,16 @@ namespace Oven.Utils.Modbus
 
         private byte[] ParseReadResponse(byte[] response)
         {
-            // 簡單解析，未進行詳細錯誤處理
-            if (response.Length < 5)
+            // 檢查CRC
+            ushort crc = BitConverter.ToUInt16(response, response.Length - 2);
+            if (crc != CalculateCrc(response, response.Length - 2))
             {
-                throw new Exception("回應長度無效");
+                throw new InvalidOperationException("CRC校驗失敗");
             }
 
-            byte[] data = new byte[response[2]];
-            Array.Copy(response, 3, data, 0, data.Length);
+            byte byteCount = response[2];
+            byte[] data = new byte[byteCount];
+            Array.Copy(response, 3, data, 0, byteCount);
             return data;
         }
 

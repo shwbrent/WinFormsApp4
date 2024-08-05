@@ -9,5 +9,5 @@ public interface IDevice
     string DeviceName { get; }
     void Connect();
     void Disconnect();
-    Task<string> FetchDataAsync();
+    Task<IDeviceEntity> FetchDataAsync();
 }

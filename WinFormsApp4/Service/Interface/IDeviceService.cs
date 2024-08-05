@@ -8,6 +8,7 @@ public interface IDeviceService
 {
     void AddDevice(IDevice device);
     void RemoveDevice(IDevice device);
-    Task FetchDataAsync();
+    void ProcessResults(List<IDeviceEntity> results);
+    //Task FetchDataAsync();
     event EventHandler<DataFetchedEventArgs> DataFetched;
 }
